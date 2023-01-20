@@ -11,6 +11,7 @@ namespace ScannerDemo
 {
     class Scanner
     {
+        const string WIA_DEVICE_PROPERTY_PAGES_ID = "3096";
         const string WIA_SCAN_COLOR_MODE = "6146";
         const string WIA_HORIZONTAL_SCAN_RESOLUTION_DPI = "6147";
         const string WIA_VERTICAL_SCAN_RESOLUTION_DPI = "6148";
@@ -39,22 +40,26 @@ namespace ScannerDemo
         /// <returns></returns>
         public ImageFile ScanImage(string imageFormat)
         {
+
             // Connect to the device and instruct it to scan
             // Connect to the device
+            //    
+            // Connect to the device and instruct it to scan from the ADF
             var device = this._deviceInfo.Connect();
-
+            SetWIAProperty(device.Properties, WIA_DEVICE_PROPERTY_PAGES_ID, 1);
             // Select the scanner
-            CommonDialogClass dlg = new CommonDialogClass(); 
+            CommonDialogClass dlg = new CommonDialogClass();
 
             var item = device.Items[1];
+            
 
             try
             {
                 AdjustScannerSettings(item, resolution, 0, 0, width_pixel, height_pixel, 0, 0, color_mode);
 
-                object scanResult = dlg.ShowTransfer(item, imageFormat, true);
+                object scanResult = item.Transfer(imageFormat);
 
-                if(scanResult != null)
+                if (scanResult != null)
                 {
                     var imageFile = (ImageFile)scanResult;
 
@@ -64,42 +69,24 @@ namespace ScannerDemo
             }
             catch (COMException e)
             {
-                // Display the exception in the console.
-                Console.WriteLine(e.ToString());
-
-                uint errorCode = (uint)e.ErrorCode;
-
-                // Catch 2 of the most common exceptions
-                if (errorCode ==  0x80210006)
-                {
-                    MessageBox.Show("The scanner is busy or isn't ready");
-                }
-                else if(errorCode == 0x80210064)
-                {
-                    MessageBox.Show("The scanning process has been cancelled.");
-                }
-                else
-                {
-                    MessageBox.Show("A non catched error occurred, check the console","Error",MessageBoxButtons.OK);
-                }
+                // Handle exceptions as before
             }
-
-            return new ImageFile();
+            return null;
         }
 
-        /// <summary>
-        /// Adjusts the settings of the scanner with the providen parameters.
-        /// </summary>
-        /// <param name="scannnerItem">Expects a </param>
-        /// <param name="scanResolutionDPI">Provide the DPI resolution that should be used e.g 150</param>
-        /// <param name="scanStartLeftPixel"></param>
-        /// <param name="scanStartTopPixel"></param>
-        /// <param name="scanWidthPixels"></param>
-        /// <param name="scanHeightPixels"></param>
-        /// <param name="brightnessPercents"></param>
-        /// <param name="contrastPercents">Modify the contrast percent</param>
-        /// <param name="colorMode">Set the color mode</param>
-        private void AdjustScannerSettings(IItem scannnerItem, int scanResolutionDPI, int scanStartLeftPixel, int scanStartTopPixel, int scanWidthPixels, int scanHeightPixels, int brightnessPercents, int contrastPercents, int colorMode)
+            /// <summary>
+            /// Adjusts the settings of the scanner with the providen parameters.
+            /// </summary>
+            /// <param name="scannnerItem">Expects a </param>
+            /// <param name="scanResolutionDPI">Provide the DPI resolution that should be used e.g 150</param>
+            /// <param name="scanStartLeftPixel"></param>
+            /// <param name="scanStartTopPixel"></param>
+            /// <param name="scanWidthPixels"></param>
+            /// <param name="scanHeightPixels"></param>
+            /// <param name="brightnessPercents"></param>
+            /// <param name="contrastPercents">Modify the contrast percent</param>
+            /// <param name="colorMode">Set the color mode</param>
+            private void AdjustScannerSettings(IItem scannnerItem, int scanResolutionDPI, int scanStartLeftPixel, int scanStartTopPixel, int scanWidthPixels, int scanHeightPixels, int brightnessPercents, int contrastPercents, int colorMode)
         {
             SetWIAProperty(scannnerItem.Properties, WIA_HORIZONTAL_SCAN_RESOLUTION_DPI, scanResolutionDPI);
             SetWIAProperty(scannnerItem.Properties, WIA_VERTICAL_SCAN_RESOLUTION_DPI, scanResolutionDPI);
@@ -118,9 +105,11 @@ namespace ScannerDemo
         /// <param name="properties"></param>
         /// <param name="propName"></param>
         /// <param name="propValue"></param>
+
         private void SetWIAProperty(IProperties properties, object propName, object propValue)
         {
             Property prop = properties.get_Item(ref propName);
+            
 
             try
             {

@@ -67,69 +67,83 @@ namespace ScannerDemo
 
         public void StartScanning()
         {
-            Scanner device = null;
-
-            this.Invoke(new MethodInvoker(delegate ()
+            bool hasPage = true;
+            do
             {
-                device = listBox1.SelectedItem as Scanner;
-            }));
+                Scanner device = null;
 
-            if (device == null)
-            {
-                MessageBox.Show("You need to select first an scanner device from the list",
-                                "Warning",
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }else if(String.IsNullOrEmpty(textBox2.Text))
-            {
-                MessageBox.Show("Provide a filename",
-                                "Warning",
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            ImageFile image = new ImageFile();
-            string imageExtension = "";
-
-            this.Invoke(new MethodInvoker(delegate ()
-            {
-                switch (comboBox1.SelectedIndex)
+                this.Invoke(new MethodInvoker(delegate ()
                 {
-                    case 0:
-                        image = device.ScanImage(WIA.FormatID.wiaFormatPNG);
-                        imageExtension = ".png";
-                        break;
-                    case 1:
-                        image = device.ScanImage(WIA.FormatID.wiaFormatJPEG);
-                        imageExtension = ".jpeg";
-                        break;
-                    case 2:
-                        image = device.ScanImage(WIA.FormatID.wiaFormatBMP);
-                        imageExtension = ".bmp";
-                        break;
-                    case 3:
-                        image = device.ScanImage(WIA.FormatID.wiaFormatGIF);
-                        imageExtension = ".gif";
-                        break;
-                    case 4:
-                        image = device.ScanImage(WIA.FormatID.wiaFormatTIFF);
-                        imageExtension = ".tiff";
-                        break;
+                    device = listBox1.SelectedItem as Scanner;
+                }));
+
+                if (device == null)
+                {
+                    MessageBox.Show("You need to select first an scanner device from the list",
+                                    "Warning",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
-            }));
-            
-            
-            // Save the image
-            var path = Path.Combine(textBox1.Text, textBox2.Text + imageExtension);
+                //else if(String.IsNullOrEmpty(textBox2.Text))
+                //{
+                //    MessageBox.Show("Provide a filename",
+                //                    "Warning",
+                //                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                //    return;
+                //}
 
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
+                
+                ImageFile image = new ImageFile();
+                string imageExtension = "";
 
-            image.SaveFile(path);
+                this.Invoke(new MethodInvoker(delegate ()
+                {
+                    switch (comboBox1.SelectedIndex)
+                    {
+                        case 0:
+                            image = device.ScanImage(WIA.FormatID.wiaFormatPNG);
+                            imageExtension = ".png";
+                            break;
+                        case 1:
+                            image = device.ScanImage(WIA.FormatID.wiaFormatJPEG);
+                            imageExtension = ".jpeg";
+                            break;
+                        case 2:
+                            image = device.ScanImage(WIA.FormatID.wiaFormatBMP);
+                            imageExtension = ".bmp";
+                            break;
+                        case 3:
+                            image = device.ScanImage(WIA.FormatID.wiaFormatGIF);
+                            imageExtension = ".gif";
+                            break;
+                        case 4:
+                            image = device.ScanImage(WIA.FormatID.wiaFormatTIFF);
+                            imageExtension = ".tiff";
+                            break;
+                    }
+                }));
 
-            pictureBox1.Image = new Bitmap(path);
+                string tempFileName = Guid.NewGuid().ToString();
+                var path = Path.Combine(textBox1.Text, tempFileName + imageExtension);
+                if (image == null)
+                    {
+                        hasPage = false;
+                        break;
+                    }
+                // Save the image
+
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+
+                image.SaveFile(path);
+
+                pictureBox1.Image = new Bitmap(path);
+
+                
+                
+            }while (hasPage);
         }
 
         private void button2_Click(object sender, EventArgs e)
