@@ -1,4 +1,6 @@
-﻿using System;
+﻿using iTextSharp.text.pdf;
+using iTextSharp.text;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,7 +26,7 @@ namespace ScannerDemo
             ListScanners();
 
             // Set start output folder TMP
-            textBox1.Text = Path.GetTempPath();
+            textBox1.Text = "C:\\Users\\gildson.lima\\Documents\\123\\";
             // Set JPEG as default
             comboBox1.SelectedIndex = 1;
 
@@ -68,6 +70,7 @@ namespace ScannerDemo
         public void StartScanning()
         {
             bool hasPage = true;
+            int i=0;
             do
             {
                 Scanner device = null;
@@ -84,13 +87,6 @@ namespace ScannerDemo
                                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-                //else if(String.IsNullOrEmpty(textBox2.Text))
-                //{
-                //    MessageBox.Show("Provide a filename",
-                //                    "Warning",
-                //                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                //    return;
-                //}
 
                 
                 ImageFile image = new ImageFile();
@@ -137,14 +133,90 @@ namespace ScannerDemo
                     File.Delete(path);
                 }
 
+
                 image.SaveFile(path);
 
-                pictureBox1.Image = new Bitmap(path);
+
+                //pictureBox1.Image = new Bitmap(path);
 
                 
                 
             }while (hasPage);
         }
+
+        
+        public string SetNewName(string Dir, string OldFileName)
+        {
+
+            System.Collections.ArrayList fileList = new System.Collections.ArrayList();
+            string NewFileName = string.Empty;
+            string[] files = Directory.GetFiles(Dir);
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                if (files[i].Contains(OldFileName))
+                {
+                    fileList.Add(files[i]);
+                }
+            }
+            NewFileName = Dir + "\\" + OldFileName + "_" + fileList.Count + ".pdf";
+
+
+            return NewFileName;
+        }
+
+        public void ImageForPDF(string ImagemCaminhoOrigem, string caminhoSaidaPDF)
+        {
+            string[] caminhoImagens = GetImageFiles(ImagemCaminhoOrigem);
+            {
+                foreach (var item in caminhoImagens)
+                {
+                    
+                    string pdfpath = caminhoSaidaPDF + ImagemCaminhoOrigem.Substring(ImagemCaminhoOrigem.LastIndexOf("\\")) + ".pdf";
+                    if (File.Exists(pdfpath))
+                    {
+                        //File.Delete(pdfpath);
+                        pdfpath = SetNewName(caminhoSaidaPDF, ImagemCaminhoOrigem.Substring(ImagemCaminhoOrigem.LastIndexOf("\\")));
+                    }
+                    using (var doc = new iTextSharp.text.Document())
+                    {
+                        iTextSharp.text.pdf.PdfWriter.GetInstance(doc, new FileStream(pdfpath, FileMode.Create));
+                        doc.Open();
+                        iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(item);
+                        image.ScalePercent(24, 24);
+                        image.Alignment = iTextSharp.text.Image.ALIGN_MIDDLE;
+
+                        doc.Add(image);
+
+                    }
+                    //File.Delete(item);
+                }
+            }
+            
+        }
+
+        public string[] GetImageFiles(string ImageSource)
+        {
+            System.Collections.ArrayList Files = new System.Collections.ArrayList();
+            string[] FilesArray = Directory.GetFiles(ImageSource);
+            foreach (string file in FilesArray)
+            {
+                string extension = file.Substring(file.LastIndexOf(".")).ToUpper();
+                if (extension.CompareTo(".JPG") == 0 || extension.CompareTo(".JPEG") == 0 || extension.CompareTo(".GIF") == 0)
+                {
+                    Files.Add(file);
+                }
+            }
+
+            string[] returnFiles = new string[Files.Count];
+            for (int i = 0; i < Files.Count; i++)
+            {
+                returnFiles[i] = Files[i].ToString();
+            }
+
+            return returnFiles;
+        }
+
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -157,6 +229,10 @@ namespace ScannerDemo
                 textBox1.Text = folderDlg.SelectedPath;
             }
         }
-         
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            ImageForPDF(textBox1.Text, textBox1.Text);
+        }
     }
 }

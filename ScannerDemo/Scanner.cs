@@ -40,10 +40,7 @@ namespace ScannerDemo
         /// <returns></returns>
         public ImageFile ScanImage(string imageFormat)
         {
-
-            // Connect to the device and instruct it to scan
-            // Connect to the device
-            //    
+    
             // Connect to the device and instruct it to scan from the ADF
             var device = this._deviceInfo.Connect();
             SetWIAProperty(device.Properties, WIA_DEVICE_PROPERTY_PAGES_ID, 1);
