@@ -45,10 +45,8 @@ namespace ScannerDemo
             var device = this._deviceInfo.Connect();
             SetWIAProperty(device.Properties, WIA_DEVICE_PROPERTY_PAGES_ID, 1);
             // Select the scanner
-            CommonDialogClass dlg = new CommonDialogClass();
 
-            var item = device.Items[1];
-            
+            var item = device.Items[1];            
 
             try
             {
@@ -66,6 +64,7 @@ namespace ScannerDemo
             }
             catch (COMException e)
             {
+                Console.WriteLine(e.Message);
                 // Handle exceptions as before
             }
             return null;

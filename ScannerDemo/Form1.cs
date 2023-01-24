@@ -19,14 +19,19 @@ namespace ScannerDemo
         public Form1()
         {
             InitializeComponent();
+
         }
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ScannedDocuments");
+            Directory.CreateDirectory(folderPath);
+            
             ListScanners();
 
             // Set start output folder TMP
-            textBox1.Text = "C:\\Users\\gildson.lima\\Documents\\123\\";
+            textBox1.Text = folderPath;
             // Set JPEG as default
             comboBox1.SelectedIndex = 1;
 
@@ -70,7 +75,7 @@ namespace ScannerDemo
         public void StartScanning()
         {
             bool hasPage = true;
-            int i=0;
+            
             do
             {
                 Scanner device = null;
